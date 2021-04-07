@@ -56,9 +56,7 @@ namespace EphysSocketNode
 
        ScopedPointer<DatagramSocket> socket;
 
-        uint16_t *recvbuf;
-        float *convbuf;
-
+        
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EphysSocket);
     };
 }
