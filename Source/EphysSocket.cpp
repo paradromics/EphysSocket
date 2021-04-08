@@ -139,7 +139,7 @@ bool EphysSocket::updateBuffer()
     CURLcode res;
     struct memory chunk;
     chunk.size = 0;
-    chunk.response = (char*)malloc(0);
+    chunk.response = NULL;
     hnd = curl_easy_init();
     int rc = -1;
     
