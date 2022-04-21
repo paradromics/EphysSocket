@@ -4,7 +4,8 @@
 
 #include "EphysSocket.h"
 #include "EphysSocketEditor.h"
-#include <curl.h>
+// #include <curl/curl.h>
+#include <curl/curl.h>
 #include <string>
 
 using namespace EphysSocketNode;
