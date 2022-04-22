@@ -217,6 +217,7 @@ void EphysSocketEditor::labelTextChanged(Label* label)
 
 void EphysSocketEditor::startAcquisition()
 {
+    std::cout << "Execution got to EPSocketEditor.startAcquisition\n";
     // Disable the whole gui
     portInput->setEnabled(false);
     channelCountInput->setEnabled(false);
@@ -226,7 +227,7 @@ void EphysSocketEditor::startAcquisition()
     offsetInput->setEnabled(false);
     connectButton->setEnabled(false);
     transposeButton.setEnabled(false);
-
+    
     // Set the channels etc
     node->data_scale = scaleInput->getText().getFloatValue();
     node->data_offset = offsetInput->getText().getIntValue();
@@ -237,6 +238,7 @@ void EphysSocketEditor::startAcquisition()
 
 void EphysSocketEditor::stopAcquisition()
 {
+    std::cout << "Execution got to EPSocketEditor.stopAcquisition\n";
     // Reenable the whole gui
     portInput->setEnabled(true);
     channelCountInput->setEnabled(true);

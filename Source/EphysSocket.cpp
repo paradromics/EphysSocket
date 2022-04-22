@@ -65,6 +65,7 @@ static size_t write_cb(void* content, size_t size, size_t nmemb, void* userp)
     }
     memcpy(&(ctx->buf[ctx->len]), content, byte_size);
     ctx->len += byte_size;
+    int loops = 0;
 
     while (ctx->len >= HDR_LEN) {
         size_t chunk_len =
@@ -79,10 +80,12 @@ static size_t write_cb(void* content, size_t size, size_t nmemb, void* userp)
         if (ctx->len >= full_len) {
             if (is_text) {
                 // LOGD("TEXT BLOCK [", chunk_len, "]");
-                fprintf(stdout, "TEXT[%ld]: %.*s\n", chunk_len, (int)chunk_len, ctx->buf + HDR_LEN);
+                // fprintf(stdout, "TEXT[%ld]: %.*s\n", chunk_len, (int)chunk_len, ctx->buf + HDR_LEN);
+                std::printf("TEXT[%lu]: %.*s\n", chunk_len, (int)chunk_len, ctx->buf + HDR_LEN);
             }
             else {
-                fprintf(stdout, "BIN[%ld]: ...\n", chunk_len);
+                //fprintf(stdout, "BIN[%ld]: ...\n", chunk_len);
+                std::printf("BIN[%lu]: ...\n", chunk_len);
                 // ctx->epsock.copyChunkToBuffer(ctx->buf + HDR_LEN, chunk_len);
                 //socket.copyChunkToBuffer(ctx->buf + HDR_LEN, chunk_len);
                 is_running = (epsock->*ctx->isThreadRunning)();
@@ -97,7 +100,14 @@ static size_t write_cb(void* content, size_t size, size_t nmemb, void* userp)
             memmove(ctx->buf, &(ctx->buf[full_len]), ctx->len - full_len);
             ctx->len -= full_len;
         }
+        //if (loops++ > 0) {
+        loops++;
+        // std::cout << "Looping in callback" << loops << std::endl;
+        std::printf("Looping in callback {%d}\n", loops);
+        // }
     }
+
+    std::cout << "Leaving callback\n";
     return byte_size;
 }
 
@@ -232,9 +242,11 @@ void  EphysSocket::tryToConnect()
     CURLcode res;
     Context ctx = {};
 
-    std::string api_url = "http://192.168.88.252/api/v_/niob/stream/nitara/chunked";
-    std::string post_data = "{\"text\":true,\"binary\":\"None\"}";
+    std::string api_url = "http://192.168.88.252/api/v_/stream/chunked";
+    std::string post_data = "{\"text\":{},\"binary\":\"RawSingleFrames\"}";
 
+    std::cout << api_url << std::endl;
+    std::cout << post_data << std::endl;
     ctx.buf = (uint8_t*)malloc(1);
     ctx.max = 1;
     ctx.epsock = this;
@@ -247,18 +259,20 @@ void  EphysSocket::tryToConnect()
     std::cout << "Attempting to set up CURL (easy setup)\n";
     std::cout << "api url: " << api_url << std::endl;
     CURL* curl = curl_easy_init();
-    curl_easy_setopt(curl, CURLOPT_URL, api_url);
+    curl_easy_setopt(curl, CURLOPT_URL, api_url.c_str());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post_data.size());
-    curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, post_data);
+    curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, post_data.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&ctx);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
     res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
+        std::string error_msg = "Ephys Socket: Curl error with code " + std::to_string(res);
         std::cout << "CURL bonked with code" << res << "\n";
         connected = false;
-        CoreServices::sendStatusMessage("Ephys Socket: Curl error");
+        // CoreServices::sendStatusMessage("Ephys Socket: Curl error");
+        CoreServices::sendStatusMessage(error_msg);
 
         //fprintf(stderr, "curl_easy_perform() failed: %s\n",
         //    curl_easy_strerror(res));
