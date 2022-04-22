@@ -25,6 +25,8 @@ $ cmake -G "Visual Studio 16 2019" -A x64 ..
 Now you will have the VS project files, including the main .sla solution file. 
 Build the plugin-GUI target first (`ALL_BUILD`).
 Then build the EphysSocket target. The `INSTALL` target will install the plugin .dll file to the main project build. 
+
+**Important:** copy the dll file `libs/bin/x64/libcurl-x64.dll` to the target build directory in plugin-GUI (in parallel to the `open-ephys.exe` file).
 (You still need to copy the debugger symbols by hand if you need them.)
 
 
