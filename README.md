@@ -1,5 +1,34 @@
-# Open Ephys plugin template
+# Chunked HTTP Ephys Socket plugin
 
+This plugin follows the template see here and described in the end sections of this doc (copied from template doc)
+
+To setup a build environment on a new host, git clone this code and the main [plugin-GUI](https://github.com/open-ephys/plugin-GUI) project within this directory structure:
+
+```
+    code
+    ├─ plugin-GUI      
+    ├─ OEPlugins
+        ├─ EphysSocket
+```
+
+For the Windows 10 build host, use Visual Studio 2019 (v2022 is the current version, so v2019 now requires a free developer membership on your MS account).
+
+For both codes, do
+
+```bash
+$ cd Build
+$ cmake -G "Visual Studio 16 2019" -A x64 ..
+```
+
+*Other targets are found in CMAKE_README.txt, but note that the CMakeLists.txt file here points to bundled libcurl dlls for Windows.*
+
+Now you will have the VS project files, including the main .sla solution file. 
+Build the plugin-GUI target first (`ALL_BUILD`).
+Then build the EphysSocket target. The `INSTALL` target will install the plugin .dll file to the main project build. 
+(You still need to copy the debugger symbols by hand if you need them.)
+
+
+## --- From the original template repo ---
 This repository contains a template for building plugins for the [Open Ephys GUI](https://github.com/open-ephys/plugin-GUI). Information on the plugin architecture can be found on [our wiki](https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/950363/Plugin+architecture).
 
 ## Creating a new plugin
