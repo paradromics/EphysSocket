@@ -4,9 +4,9 @@
 
 #include "EphysSocket.h"
 #include "EphysSocketEditor.h"
-// #include <curl/curl.h>
 #include <curl/curl.h>
 #include <string>
+#include <iostream>
 
 using namespace EphysSocketNode;
 
@@ -20,6 +20,7 @@ struct Context {
     //EphysSocketNode* socket_class;
     EphysSocket* epsock;
     void (EphysSocket::* copyChunkToBuffer)(uint8_t* chunk_buffer, int chunk_len);
+    bool (EphysSocket::* isThreadRunning)();
     //void* epsock;
 };
 
@@ -44,7 +45,7 @@ static size_t write_cb(void* content, size_t size, size_t nmemb, void* userp)
 
     //return realsize;
 
-
+    bool is_running;
     size_t byte_size = size * nmemb;
     struct Context* ctx = (struct Context*)userp;
     size_t needed = ctx->len + byte_size;
@@ -84,7 +85,14 @@ static size_t write_cb(void* content, size_t size, size_t nmemb, void* userp)
                 fprintf(stdout, "BIN[%ld]: ...\n", chunk_len);
                 // ctx->epsock.copyChunkToBuffer(ctx->buf + HDR_LEN, chunk_len);
                 //socket.copyChunkToBuffer(ctx->buf + HDR_LEN, chunk_len);
-                (epsock->*ctx->copyChunkToBuffer)(ctx->buf + HDR_LEN, chunk_len);
+                is_running = (epsock->*ctx->isThreadRunning)();
+                if (is_running) {
+                    std::cout << "Trying to copy binary block to EphysSocket buffer\n";
+                    (epsock->*ctx->copyChunkToBuffer)(ctx->buf + HDR_LEN, chunk_len);
+                }
+                else {
+                    std::cout << "Eating binary block because thread not yet running\n";
+                }
             }
             memmove(ctx->buf, &(ctx->buf[full_len]), ctx->len - full_len);
             ctx->len -= full_len;
@@ -166,6 +174,7 @@ bool EphysSocket::foundInputSource()
 
 bool EphysSocket::startAcquisition()
 {
+    /*
     CURLcode res;
     Context ctx = {};
 
@@ -179,8 +188,10 @@ bool EphysSocket::startAcquisition()
 
     // Prepare buffer to callback
     resizeChanSamp();
-
+    std::cout << "CURL GLOBAL INIT\n";
     curl_global_init(CURL_GLOBAL_ALL);
+    std::cout << "Attempting to set up CURL (easy setup)\n";
+    std::cout << "api url: " << api_url << std::endl;
     CURL* curl = curl_easy_init();
     curl_easy_setopt(curl, CURLOPT_URL, api_url);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post_data.size());
@@ -191,22 +202,26 @@ bool EphysSocket::startAcquisition()
 
     res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
+        std::cout << "CURL bonked\n";
         CoreServices::sendStatusMessage("Ephys Socket: Curl error");
 
         //fprintf(stderr, "curl_easy_perform() failed: %s\n",
         //    curl_easy_strerror(res));
     }
     connected = true;
-
+    std::cout << "CURL connected!!!!\n";
     //if (rc == -1)
     //{
     //    CoreServices::sendStatusMessage("Ephys Socket: Data shape mismatch");
     //    return false;
     //}
+    */
 
+    // Prepare buffer to callback
+    resizeChanSamp();
     total_samples = 0;
 
-    startTimer(5000);
+    // startTimer(5000);
 
     startThread();
     return true;
@@ -214,7 +229,43 @@ bool EphysSocket::startAcquisition()
 
 void  EphysSocket::tryToConnect()
 {
-    connected = true;
+    CURLcode res;
+    Context ctx = {};
+
+    std::string api_url = "http://192.168.88.252/api/v_/niob/stream/nitara/chunked";
+    std::string post_data = "{\"text\":true,\"binary\":\"None\"}";
+
+    ctx.buf = (uint8_t*)malloc(1);
+    ctx.max = 1;
+    ctx.epsock = this;
+    ctx.copyChunkToBuffer = &EphysSocket::copyChunkToBuffer;
+
+    // Prepare buffer to callback
+    // resizeChanSamp();
+    std::cout << "CURL GLOBAL INIT\n";
+    curl_global_init(CURL_GLOBAL_ALL);
+    std::cout << "Attempting to set up CURL (easy setup)\n";
+    std::cout << "api url: " << api_url << std::endl;
+    CURL* curl = curl_easy_init();
+    curl_easy_setopt(curl, CURLOPT_URL, api_url);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post_data.size());
+    curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, post_data);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&ctx);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+
+    res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        std::cout << "CURL bonked with code" << res << "\n";
+        connected = false;
+        CoreServices::sendStatusMessage("Ephys Socket: Curl error");
+
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n",
+        //    curl_easy_strerror(res));
+    } else {
+        std::cout << "CURL connected!!!\n";
+        connected = true;
+    }
 }
 
 bool EphysSocket::stopAcquisition()

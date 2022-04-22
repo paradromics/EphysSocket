@@ -42,6 +42,20 @@ extern "C" EXPORT void getLibInfo(Plugin::LibraryInfo* info)
 	info->numPlugins = NUM_PLUGINS;
 }
 
+/* 
+
+// specifies that we are creating a DataThread plugin
+info->type = PluginType::PLUGIN_TYPE_DATA_THREAD;
+
+// edit to change how your plugin's name is displayed in the GUI
+info->dataThread.name = "Plugin Name";
+
+// Replace "DataThreadClassName" with the class name of your plugin
+info->dataThread.creator = &createDataThread<DataThreadClassName>;
+
+*/
+
+
 extern "C" EXPORT int getPluginInfo(int index, Plugin::PluginInfo* info)
 {
 	switch (index)
