@@ -60,7 +60,7 @@ namespace EphysSocketNode
 
         bool connected = false;
 
-       ScopedPointer<DatagramSocket> socket;
+        // ScopedPointer<DatagramSocket> socket;
 
         
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EphysSocket);

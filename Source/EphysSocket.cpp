@@ -4,6 +4,8 @@
 
 #include "EphysSocket.h"
 #include "EphysSocketEditor.h"
+//#include "JuceHeader.h"
+#include "juce_curl_Network.h"
 #include <curl/curl.h>
 #include <string>
 #include <iostream>
@@ -242,11 +244,26 @@ void  EphysSocket::tryToConnect()
     CURLcode res;
     Context ctx = {};
 
-    std::string api_url = "http://192.168.88.252/api/v_/stream/chunked";
+    std::string api_url = "http://10.156.5.24/api/v_/stream/chunked";
     std::string post_data = "{\"text\":{},\"binary\":\"RawSingleFrames\"}";
 
     std::cout << api_url << std::endl;
     std::cout << post_data << std::endl;
+    
+    URL::OpenStreamProgressCallback* progressCallback = nullptr;
+    void* progressCallbackContext = nullptr;
+    MemoryBlock *post_data = new MemoryBlock();
+
+/* 
+    WebInputStream (const String& address, bool isPost, const MemoryBlock& postData,
+                    URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
+                    const String& headers, int timeOutMs, StringPairArray* responseHeaders,
+                    const int maxRedirects, const String& httpRequest)
+
+*/
+   //  WebInputStream foo = new WebInputStream(api_url, false, post_data, progressCallback, progressCallbackContext)
+    
+    
     ctx.buf = (uint8_t*)malloc(1);
     ctx.max = 1;
     ctx.epsock = this;
@@ -338,85 +355,7 @@ void EphysSocket::copyChunkToBuffer(uint8_t* chunk_buffer, int chunk_len) {
 bool EphysSocket::updateBuffer()
 {
 
-    //CURL* hnd;
-    //CURLcode res;
-    //// struct memory chunk;
-    //struct Context ctx;
-    //ctx.len = 0;
-    //ctx.max = 1;
-    //ctx.buf = (uint8_t *) malloc(1);
-    //hnd = curl_easy_init();
-    //int rc = -1;
-    //
-    //if (hnd) {
-    //    struct curl_slist* slist1;
-    //    slist1 = NULL;
-    //    slist1 = curl_slist_append(slist1, "Content-Type: application/json");
-    //    // std::string url = "http://localhost:" + std::to_string(port) + "/api/stream";
-    //    std::string url = "http://10.156.5.21/api/v_/niob/stream/nitara/chunked";
-    //    std::string postfields = "{\"text\":true,\"binary\":\"None\"}";
-
-    //    curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-    //    curl_easy_setopt(hnd, CURLOPT_URL,url.c_str());
-    //    curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
-    //    /*
-    //    curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, "{\"chunkRate\":" + std::to_string(round((float)(sample_rate) / (float)num_samp)) + ","
-    //                                             + "\"sampleRate\":" + std::to_string(sample_rate) + ","
-    //                                             + "\"cols\":" + std::to_string(num_channels) + ","
-    //                                             + "\"format\":\"u16\"}");
-    //    */
-    //    curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, postfields);
-    //    curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)52);
-    //    curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
-    //    curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.58.0");
-    //    curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-    //    // curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
-    //    curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "POST");
-    //    curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-    //    curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
-    //    curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, cb);
-    //    curl_easy_setopt(hnd, CURLOPT_WRITEDATA, (void *)&ctx);
-    //    res = curl_easy_perform(hnd);
-    //    
-    //    curl_easy_cleanup(hnd);
-    //    if (res == CURLE_OK)
-    //        rc = 0;
-    //}
-
-    //if (rc == -1)
-    //{
-    //    CoreServices::sendStatusMessage("Ephys Socket: Data shape mismatch");
-    //    return false;
-    //}
-    // Should this be corrected for 4-byte headers
-    //int n = ctx.len / 2;
-    //
-    //uint16_t* recvbuf = (uint16_t*) ctx.buf;
-
-    //float* convbuf = (float*)malloc(n * sizeof(float));
-    //// Transpose because the chunkSize argument in addToBuffer does not seem to do anything
-    //if (transpose) {
-    //    int k = 0;
-    //    for (int i = 0; i < n; i++) {
-    //        for (int j = 0; j < num_channels; j++) {
-    //            convbuf[k++] = data_scale *  (float)(recvbuf[j*n + i] - data_offset);
-    //        }
-    //    }
-    //} else {
-    //    for (int i = 0; i < n * num_channels; i++)
-    //        convbuf[i] = data_scale *  (float)(recvbuf[i] - data_offset);
-    //}
-
-    //sourceBuffers[0]->addToBuffer(convbuf, 
-    //                              &timestamps.getReference(0), 
-    //                              &ttlEventWords.getReference(0), 
-    //                              n, 
-    //                              1);
-
-    //total_samples += num_samp;
-
-    //free(convbuf);
-    //free(recvbuf);
+  
     return true;
 }
 
