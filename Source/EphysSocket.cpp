@@ -107,7 +107,8 @@ static size_t write_cb(void* content, size_t size, size_t nmemb, void* userp)
         // }
     }
 
-    std::cout << "Leaving callback\n";
+    // std::cout << "Leaving callback\n";
+    std::printf("Leaving callback\n");
     return byte_size;
 }
 
@@ -267,9 +268,11 @@ void  EphysSocket::tryToConnect()
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
     res = curl_easy_perform(curl);
+    std::printf("Have gotten return code\n");
     if (res != CURLE_OK) {
         std::string error_msg = "Ephys Socket: Curl error with code " + std::to_string(res);
-        std::cout << "CURL bonked with code" << res << "\n";
+        // std::cout << "CURL bonked with code" << res << "\n";
+        std::printf("CURL bonked with code %d\n", res);
         connected = false;
         // CoreServices::sendStatusMessage("Ephys Socket: Curl error");
         CoreServices::sendStatusMessage(error_msg);
@@ -277,9 +280,10 @@ void  EphysSocket::tryToConnect()
         //fprintf(stderr, "curl_easy_perform() failed: %s\n",
         //    curl_easy_strerror(res));
     } else {
-        std::cout << "CURL connected!!!\n";
+        std::printf("CURL connected!!!\n");
         connected = true;
     }
+    std::printf("Returning from tryToConnect\n");
 }
 
 bool EphysSocket::stopAcquisition()
